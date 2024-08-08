@@ -167,7 +167,7 @@ const otpVerifyController = async (req, res) => {
       if (updateUser)
         return ApiSuccess(res, 200, true, "OTP verify successfully");
     } else {
-      return ApiError(res, 400, "Invalid Email or OTP");
+      return ApiError(res, 400, "Invalid OTP");
     }
   } catch (error) {
     return ApiError(res, 500, error?.message);
