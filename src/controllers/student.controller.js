@@ -1,5 +1,6 @@
+const { Op } = require('sequelize');
+const DB = require('../config/mysqlDB');
 const studentValidation = require("../validations/studentValidation");
-const studentService = require("../services/studentService");
 const { deleteFile } = require("../utils/fileUploadOnLocal");
 const { ApiSuccess, ApiError } = require("../utils/ApiResponse");
 
@@ -26,10 +27,11 @@ const createStudentController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     // add file path
-    value.profile = file?.path
+    value.profile = file?.path;
 
     // Create Student
-    const result = await studentService.createStudentService(value);
+    const result = await DB.studentModel.create(value);
+
     if (result)
       return ApiSuccess(res, 201, true, "Student add successfully", result);
 
@@ -48,21 +50,23 @@ const getAllStudentsController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     const { page = 1, limit = 10, name = '' } = value;
+    const offset = (page - 1) * limit;
 
     // Get all students
-    const allStudents = await studentService.getAllStudentsService(page, limit, name);
+    const { count: total, rows: students } = await DB.studentModel.findAndCountAll({
+      where: { name: { [Op.like]: `%${name}%` } },
+      limit: limit,
+      offset: offset
+    });
 
-    if (allStudents) {
-      const { total, students } = allStudents;
-
-      const data = {
-        currentPage: page,
-        totalPage: Math.ceil(total / limit), // Calculate total number of pages
-        totalCount: total,
-        studentsData: students,
-      }
-      return ApiSuccess(res, 200, true, "Get All Students Data", data);
+    const data = {
+      currentPage: page,
+      totalPage: Math.ceil(total / limit), // Calculate total number of pages
+      totalCount: total,
+      studentsData: students,
     }
+    return ApiSuccess(res, 200, true, "Get All Students Data", data);
+
   } catch (error) {
     return ApiError(res, 500, error?.message);
   }
@@ -76,7 +80,7 @@ const getStudentByIdController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     // Get student by id
-    const studentData = await studentService.getStudentByIdService(value.id);
+    const studentData = await DB.studentModel.findByPk(value.id);
 
     if (studentData) {
       return ApiSuccess(res, 200, true, "Get student data", studentData);
@@ -106,7 +110,7 @@ const updateStudentByIdController = async (req, res) => {
     if (file) {
 
       // Get student by id
-      const studentData = await studentService.getStudentByIdService(idValue.id);
+      const studentData = await DB.studentModel.findByPk(idValue.id);
 
       // delete exist file path
       deleteFile(studentData?.profile, (err, data) => {
@@ -120,8 +124,10 @@ const updateStudentByIdController = async (req, res) => {
     }
 
     // Find student and update
-    const studentUpdateData = await studentService.updateStudentByIdService(idValue.id, bodyValue);
-    if (studentUpdateData) {
+    const updateData = await DB.studentModel.update(bodyValue, { where: { id: idValue.id } });
+
+    if (updateData) {
+      const studentUpdateData = await DB.studentModel.findByPk(idValue.id);
       return ApiSuccess(res, 200, true, "Student update successfully", studentUpdateData);
     } else {
       return ApiError(res, 400, "Student not found");
@@ -137,8 +143,9 @@ const deleteStudentByIdController = async (req, res) => {
     const { error, value } = studentValidation.studentIdSchema.validate(req.params);
     if (error)
       return ApiError(res, 400, error.details[0].message);
+
     // Find and delete student
-    const studentData = await studentService.deleteStudentByIdService(value.id);
+    const studentData = await DB.studentModel.findByPk(value.id);
 
     if (studentData) {
 
@@ -148,6 +155,8 @@ const deleteStudentByIdController = async (req, res) => {
           console.log('Error file deleting');
         }
       });
+
+      await DB.studentModel.destroy({ where: { id: value.id } });
 
       return ApiSuccess(res, 200, true, "Student delete successfully");
     } else {

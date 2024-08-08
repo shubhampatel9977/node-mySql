@@ -8,7 +8,7 @@ const teacherSchema = Joi.object({
 });
 
 const teacherIdSchema = Joi.object({
-  id: Joi.string().hex().length(24).required(),
+  id: Joi.string().required(),
 });
 
 const teacherPagination = Joi.object({

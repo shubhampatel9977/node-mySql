@@ -1,6 +1,6 @@
 const express = require("express");
 require("dotenv").config();
-// const configureCors = require("./src/config/corsConfig.js");
+const configureCors = require("./src/config/corsConfig.js");
 // const configureRateLimiter = require("./src/config/rateLimiterConfig.js");
 const routes = require("./src/routes/index.js");
 
@@ -11,7 +11,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Apply CORS middleware
-// app.use(configureCors());
+app.use(configureCors());
 
 // Apply rate limiter middleware
 // app.use(configureRateLimiter());

@@ -24,11 +24,11 @@ db.Sequelize = Sequelize;
 //<======================= Import Models =======================>//
 
 // User models
-db.userModel = require("../models/userModel")(sequelize, DataTypes);
-db.studentModel = require("../models/studentModel")(sequelize, DataTypes);
+db.userModel = require("../models/user.model")(sequelize, DataTypes);
+db.studentModel = require("../models/student.model")(sequelize, DataTypes);
 
 // Admin modals
-db.teacherModel = require("../models/admin/teacherModel")(sequelize, DataTypes);
+db.teacherModel = require("../models/admin/teacher.model")(sequelize, DataTypes);
 
 // Sync all models
 db.sequelize.sync({ alter: true }).then(() => {

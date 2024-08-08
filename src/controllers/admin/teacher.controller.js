@@ -1,5 +1,6 @@
+const { Op } = require('sequelize');
+const DB = require('../../config/mysqlDB');
 const teacherValidation = require("../../validations/admin/teacherValidation");
-const teacherService = require("../../services/admin/teacherService");
 const { deleteFile } = require("../../utils/fileUploadOnLocal");
 const { ApiSuccess, ApiError } = require("../../utils/ApiResponse");
 
@@ -26,10 +27,11 @@ const createTeacherController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     // add file path
-    value.profile = file?.path
+    value.profile = file?.path;
 
     // Create Teacher
-    const result = await teacherService.createTeacherService(value);
+    const result = await DB.teacherModel.create(value);
+    
     if (result)
       return ApiSuccess(res, 201, true, "Teacher add successfully", result);
 
@@ -48,12 +50,14 @@ const getAllTeachersController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     const { page = 1, limit = 10, name = '' } = value;
+    const offset = (page - 1) * limit;
 
     // Get all teachers
-    const allTeachers = await teacherService.getAllTeacherService(page, limit, name);
-
-    if (allTeachers) {
-      const { total, teachers } = allTeachers;
+    const { count: total, rows: teachers } = await DB.teacherModel.findAndCountAll({
+      where: { name: { [Op.like]: `%${name}%` } },
+      limit: limit,
+      offset: offset
+    });
 
       const data = {
         currentPage: page,
@@ -62,7 +66,6 @@ const getAllTeachersController = async (req, res) => {
         teachersData: teachers,
       }
       return ApiSuccess(res, 200, true, "Get All Teachers Data", data);
-    }
   } catch (error) {
     return ApiError(res, 500, error?.message);
   }
@@ -76,7 +79,7 @@ const getTeacherByIdController = async (req, res) => {
       return ApiError(res, 400, error.details[0].message);
 
     // Get teacher by id
-    const teacherData = await teacherService.getTeacherByIdService(value.id);
+    const teacherData = await DB.teacherModel.findByPk(value.id);
 
     if (teacherData) {
       return ApiSuccess(res, 200, true, "Get teacher data", teacherData);
@@ -106,7 +109,7 @@ const updateTeacherByIdController = async (req, res) => {
     if (file) {
 
       // Get teacher by id
-      const teacherData = await teacherService.getTeacherByIdService(idValue.id);
+      const teacherData = await DB.teacherModel.findByPk(idValue.id);
 
       // delete exist file path
       deleteFile(teacherData?.profile, (err, data) => {
@@ -120,8 +123,9 @@ const updateTeacherByIdController = async (req, res) => {
     }
 
     // Find teacher and update
-    const teacherUpdateData = await teacherService.updateTeacherByIdService(idValue.id, bodyValue);
-    if (teacherUpdateData) {
+    const updateData = await DB.teacherModel.update(bodyValue, { where: { id: idValue.id } });
+    if (updateData) {
+      const teacherUpdateData = await DB.teacherModel.findByPk(idValue.id);
       return ApiSuccess(res, 200, true, "Teacher update successfully", teacherUpdateData);
     } else {
       return ApiError(res, 400, "Teacher not found");
@@ -137,8 +141,9 @@ const deleteTeacherByIdController = async (req, res) => {
     const { error, value } = teacherValidation.teacherIdSchema.validate(req.params);
     if (error)
       return ApiError(res, 400, error.details[0].message);
+    
     // Find and delete teacher
-    const teacherData = await teacherService.deleteTeacherByIdService(value.id);
+    const teacherData = await DB.teacherModel.findByPk(value.id);
 
     if (teacherData) {
 
@@ -148,6 +153,8 @@ const deleteTeacherByIdController = async (req, res) => {
           console.log('Error file deleting');
         }
       });
+
+      await DB.teacherModel.destroy({ where: { id: value.id } });
 
       return ApiSuccess(res, 200, true, "Teacher delete successfully");
     } else {
