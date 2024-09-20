@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const DB = require('../config/mysqlDB');
+const { DB } = require('../config/mysqlDB');
 const studentValidation = require("../validations/studentValidation");
 const { deleteFile } = require("../utils/fileUploadOnLocal");
 const { ApiSuccess, ApiError } = require("../utils/ApiResponse");
