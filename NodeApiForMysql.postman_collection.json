@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "071661af-ffe5-4608-94f7-341d6eed0c27",
+		"_postman_id": "78c394fd-411b-4b07-8962-abe009d0bc2e",
 		"name": "NodeApiForMysql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34082702",
-		"_collection_link": "https://restless-robot-543807.postman.co/workspace/My-Workspace~e381d1ce-3e74-400f-8abe-4143a5b50173/collection/34082702-071661af-ffe5-4608-94f7-341d6eed0c27?action=share&source=collection_link&creator=34082702"
+		"_collection_link": "https://restless-robot-543807.postman.co/workspace/legalCare_for_frontend~8870e9e6-d7ca-40c8-bdaa-44535a514100/collection/34082702-78c394fd-411b-4b07-8962-abe009d0bc2e?action=share&source=collection_link&creator=34082702"
 	},
 	"item": [
 		{
@@ -17,7 +17,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"demo-update\",\n    \"email\": \"demo@gmail.com\",\n    \"password\": \"123456\"\n}",
+							"raw": "{\n    \"name\": \"demo\",\n    \"email\": \"demo@gmail.com\",\n    \"password\": \"123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -137,7 +137,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\" : \"demo@gmail.com\",\n    \"otp\" : \"955184\"\n}",
+							"raw": "{\n    \"email\" : \"admin@gmail.com\",\n    \"otp\" : \"477817\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -185,6 +185,27 @@
 								"api",
 								"auth",
 								"setNewPassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"logout"
 							]
 						}
 					},

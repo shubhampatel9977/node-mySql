@@ -1,9 +1,12 @@
+const { v4: uuidv4 } = require('uuid');
+
 const studentModel = (sequelize, DataTypes) => {
     const students = sequelize.define('student', {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
+            defaultValue: uuidv4,
             primaryKey: true,
-            autoIncrement: true
+            allowNull: false,
         },
         name: {
             type: DataTypes.STRING,

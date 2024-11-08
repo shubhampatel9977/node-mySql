@@ -32,26 +32,24 @@ function authorize(accessRole) {
 
   return (req, res, next) => {
     try {
-      const bearerToken = req.header("Authorization");
+      const token = req.cookies.accessToken;
 
-      if (!bearerToken) {
+      if (!token) {
         return ApiError(res, 401, "Unauthorized - Missing token");
       }
 
-      const token = bearerToken.split(" ")[1];
-
       jwt.verify(token, accessTokenSecretKey, (err, data) => {
         if (err) {
-          return ApiError(res, 403, "Forbidden - Invalid token");
+          return ApiError(res, 401, "Forbidden - Invalid token");
         }
         
         // Check if user has the required role
         if (accessRole.length && !accessRole.includes(data?.userInfo?.type)) {
-          return ApiError(res, 403, "Permission denied");
+          return ApiError(res, 401, "Permission denied");
         }
 
         // // Attach the entire decoded data to the req object
-        // req.user = data;
+        req.userId = data?.userInfo?.userId;
 
         next();
       });
